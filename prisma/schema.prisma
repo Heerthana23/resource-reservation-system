@@ -1,0 +1,42 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Resource {
+  id           String        @id @default(cuid())
+  name         String
+  type         String
+  description  String?
+  location     String?
+  isAvailable  Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  reservations Reservation[]
+
+  @@index([type])
+  @@index([isAvailable])
+}
+
+model Reservation {
+  id          String   @id @default(cuid())
+  title       String
+  reservedBy  String
+  email       String
+  startTime   DateTime
+  endTime     DateTime
+  status      String   @default("CONFIRMED")
+  notes       String?
+  resourceId  String
+  resource    Resource @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([resourceId, startTime, endTime])
+  @@index([email])
+}
